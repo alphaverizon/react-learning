@@ -1,52 +1,55 @@
 import React,{ Component} from 'react';
+
+import { graphql} from 'react-apollo';
+import { getFireByMonth } from '../queries/queries';
+
 import '../../node_modules/react-vis/dist/style.css';
-import {
-    XYPlot, 
-    XAxis,
-    YAxis,
-    HeatmapSeries,
-    VerticalGridLines,
-    HorizontalGridLines,
-    MarkSeries
-} from 'react-vis';
+import {XYPlot,XAxis,YAxis,HeatmapSeries} from 'react-vis';
+
 
 class HeatMap extends Component {
     chart_data=null;
 
-    componentWillMount(){
-        console.log('component will mount-HeatMap');
-    }
-
-    componentWillReceiveProps(nextProps){
-        var data=nextProps.data;  
-        this.chart_data=[];
-
-        for(let value in data){
-            this.chart_data.push({x:data[value].X, y:data[value].Y,color:data[value].temp});
+    getAllForestData(){
+        var data = this.props.getFireByMonth;
+        if(!data.loading)
+        {   
+            this.chart_data=[];
+            data.forestbymonth.map(forest => {
+                this.chart_data.push({x:forest.X, y:forest.Y,color:forest.temp});    
+            });
         }
-    }
-    
-    componentDidUpdate(){
-        console.log('component did update-HeatMap');    
     }
 
     render(){
+        this.getAllForestData();
         if(this.chart_data===null) 
-            return null;  
-            
-            return(
-                <XYPlot
-                    width={600}
-                    height={400}>
-                    <XAxis />
-                    <YAxis />
-                    <HeatmapSeries
-                    className="heatmap-series-example"
-                    data={this.chart_data}/>
-                </XYPlot>
+            return null;
 
-            );
+        return(
+            <XYPlot
+                width={600}
+                height={400}>
+                <XAxis />
+                <YAxis />
+                <HeatmapSeries
+                    className="heatmap-series-example"
+                    data={this.chart_data}
+                />
+            </XYPlot>
+
+        );
     }
 }
 
-export default HeatMap;
+export default graphql(getFireByMonth, {
+    name:'getFireByMonth',
+    options: (props) => {
+        return {
+            variables: {
+                month: props.monthData
+            }
+        }
+    }
+})(HeatMap);
+

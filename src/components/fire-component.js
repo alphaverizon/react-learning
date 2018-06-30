@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { graphql,compose  } from 'react-apollo';
 
-import { getFireByMonth } from '../queries/queries';
 import HeatMap from './heatmap';
 
 
@@ -14,33 +12,26 @@ class FireComponent extends Component {
             month:''
         };
     }
-
-    getAllForestData(){
-        var data = this.props.getFireByMonth;
-        if(!data.loading)
-        {
-            return data.forestbymonth.map(forest => {
-                return forest;
-            })
-        }
+    setButtonState(monthname){
+        this.setState({ month:monthname.substr(0,3).toLowerCase()})
     }
 
     render(){
+        const monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September", "October", "November", "December"];
+        var self = this;
         return(
             <div>
-                <HeatMap data={this.getAllForestData()}/>
+                <HeatMap monthData={this.state.month}/>
+                {   
+                    monthNames.map(function(name, index){
+                        return <button onClick={(e)=>
+                            self.setButtonState(name)
+                        } key={ index } >{name}</button>;
+                     })
+                }
             </div>
         );
     }
 }
 
-export default graphql(getFireByMonth, {
-    name:'getFireByMonth',
-    options: (props) => {
-        return {
-            variables: {
-                month: 'oct'
-            }
-        }
-    }
-})(FireComponent);
+export default FireComponent;
